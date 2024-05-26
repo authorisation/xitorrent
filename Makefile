@@ -21,4 +21,7 @@ $(TARGET): $(OBJS)
 clean:
 	rm -f $(OBJS) $(TARGET)
 
+install:
+	cp $(TARGET) /usr/local/bin
+
 .PHONY: all clean
