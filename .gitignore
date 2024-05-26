@@ -1,4 +1,5 @@
 main.o
+draw.o
 xitorrent
 .vscode
 output.png

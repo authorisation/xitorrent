@@ -6,7 +6,7 @@ LIBS = -lcairo
 
 TARGET = xitorrent
 
-SRCS = main.c
+SRCS = main.c draw.c
 
 OBJS = $(SRCS:.c=.o)
 
