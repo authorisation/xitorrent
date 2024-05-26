@@ -5,14 +5,14 @@
 #include <bits/getopt_core.h>
 #include <string.h>
 
-#define VERSION "1.0"
+#define VERSION "1.0.0"
 
 void print_help(const char *progname) {
-    printf("Usage: [-h] -t text (-b) (-i) -o output.png\n");
+    printf("Usage: [-h] -t text -i file.torrent -x trackers.txt -o output.png\n");
     printf("  -h                            Display this help message\n");
     printf("  -t <text>                     Torrent title\n");
     printf("  -i <input.torrent>            Input torrent file\n");
-    printf("  -b <seeds;peers;filesize>     Torrent info - Optional, overrides input torrent file.\n");
+    printf("  -x <trackers.txt>             Tracker list to scan against\n");
     printf("  -o <output.png>               Output image file\n");
     printf("  -v                            Display Version\n");
 }
@@ -24,6 +24,27 @@ cairo_surface_t* init_image(int width, int height) {
     // Background color
     cairo_set_source_rgb(cr, 1, 1, 1);
     cairo_paint(cr);
+
+    // Yumeko!
+    const char *image_path = "yumeko_asset.png";
+    cairo_surface_t *image = cairo_image_surface_create_from_png(image_path);
+    if (cairo_surface_status(image) != CAIRO_STATUS_SUCCESS) {
+        fprintf(stderr, "Error: Could not load image %s\n", image_path);
+        cairo_destroy(cr);
+        cairo_surface_destroy(surface);
+        return NULL;
+    }
+    int image_width = cairo_image_surface_get_width(image);
+    int image_height = cairo_image_surface_get_height(image);
+    double scale_factor = 0.155555;
+    double scaled_width = image_width * scale_factor;
+    double scaled_height = image_height * scale_factor;
+    cairo_save(cr);
+    cairo_translate(cr, width - scaled_width - 10, height - scaled_height);
+    cairo_scale(cr, scale_factor, scale_factor);
+    cairo_set_source_surface(cr, image, 0, 0);
+    cairo_paint(cr);
+    cairo_restore(cr);
 
     cairo_destroy(cr);
     return surface;
@@ -53,9 +74,10 @@ int main(int argc, char *argv[]) {
     const char *info = NULL;
     const char *input_filename = NULL;
     const char *output_filename = NULL;
+    const char *trackers_filename = NULL;
 
     int opt;
-    while ((opt = getopt(argc, argv, "ht:b:i:o:v")) != -1) {
+    while ((opt = getopt(argc, argv, "ht:i:x:o:v")) != -1) {
         switch (opt) {
             case 'h':
                 print_help(argv[0]);
@@ -63,17 +85,17 @@ int main(int argc, char *argv[]) {
             case 't':
                 text = optarg;
                 break;
-            case 'b':
-                info = optarg;
-                break;
             case 'i':
                 input_filename = optarg;
+                break;
+            case 'x':
+                trackers_filename = optarg;
                 break;
             case 'o':
                 output_filename = optarg;
                 break;
             case 'v':
-                printf("%s version %s\n", argv[0], VERSION);
+                printf("version %s\n", VERSION);
                 exit(EXIT_SUCCESS);
             default:
                 print_help(argv[0]);
@@ -81,7 +103,7 @@ int main(int argc, char *argv[]) {
         }
     };
 
-    if (!text || !output_filename || (!info && !input_filename)) {
+    if (!text || !input_filename || !trackers_filename || !output_filename) {
         fprintf(stderr, "Error: missing required options\n");
         print_help(argv[0]);
         exit(EXIT_FAILURE);
