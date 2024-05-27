@@ -9,10 +9,10 @@ cairo_surface_t* init_image(int width, int height) {
     cairo_paint(cr);
 
     // Yumeko!
-    const char *image_path = "yumeko_asset.png";
-    cairo_surface_t *image = cairo_image_surface_create_from_png(image_path);
+    const char *goddess = "yumeko_asset.png";
+    cairo_surface_t *image = cairo_image_surface_create_from_png(goddess);
     if (cairo_surface_status(image) != CAIRO_STATUS_SUCCESS) {
-        fprintf(stderr, "Error: Could not load image %s\n", image_path);
+        fprintf(stderr, "Error: Could not load image %s\n", goddess);
         cairo_destroy(cr);
         cairo_surface_destroy(surface);
         return NULL;
