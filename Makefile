@@ -2,11 +2,10 @@ CC = gcc
 
 CFLAGS = -Wall -g
 
-LIBS = -lcairo
-
+LIBS = -lcairo -lcrypto -lssl
 TARGET = xitorrent
 
-SRCS = main.c draw.c
+SRCS = main.c draw.c utils/torrent_parser.c
 
 OBJS = $(SRCS:.c=.o)
 

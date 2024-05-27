@@ -1,4 +1,4 @@
-#include </usr/include/cairo/cairo.h>
+#include <cairo/cairo.h>
 #include <stdio.h>
 
 cairo_surface_t* init_image(int width, int height) {
@@ -57,6 +57,7 @@ void draw_body(const char *filename, int seeds, int peers, int completed, int fi
     cairo_set_font_size(cr, 14);
 
     cairo_move_to(cr, 5, 32);
+    //Placeholder text
     cairo_show_text(cr, "files : %s (%s); seeds: %s; peers: %s; completed %s");
     cairo_move_to(cr, 5, 47);
     cairo_show_text(cr, "info from %s trackers - %s (%s)");
@@ -64,5 +65,6 @@ void draw_body(const char *filename, int seeds, int peers, int completed, int fi
     cairo_surface_write_to_png(surface, filename);
 
     cairo_destroy(cr);
+    //Operation is considered done, so destroy the surface
     cairo_surface_destroy(surface);
 }

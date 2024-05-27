@@ -1,11 +1,13 @@
-#include </usr/include/cairo/cairo.h>
+#include <cairo/cairo.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <bits/getopt_core.h>
 #include <string.h>
+#include <openssl/sha.h>
 
 #include "draw.h"
+#include "utils/torrent_parser.h"
 
 #define VERSION "1.0.0"
 
@@ -65,5 +67,17 @@ int main(int argc, char *argv[]) {
 
     draw_title(output_filename, text, info, surface);
     draw_body(output_filename, 0, 0, 0, 0, 0, 0, 0, surface);
+
+    long length;
+    char* bencoded_data = read_file(input_filename, &length);
+    char* data_ptr = bencoded_data;
+    decode(&data_ptr);
+
+    data_ptr = bencoded_data;
+    const char* info_start = NULL;
+    long info_length = 0;
+    decode_dict(&data_ptr, 1, &info_start, &info_length);
+
+    free(bencoded_data);
     return 0;
 }
