@@ -58,9 +58,22 @@ void draw_body(const char *filename, int seeds, int peers, int completed, int fi
 
     cairo_move_to(cr, 5, 32);
     char info_text[256];
-    snprintf(info_text, sizeof(info_text), "files: %d (%s); seeds: %d; peers: %d", file_count, file_size, seeds, peers);
+    snprintf(info_text, sizeof(info_text), "files: %d (%s); seeds: ", file_count, file_size);
     cairo_show_text(cr, info_text);
 
+    cairo_set_source_rgb(cr, 0, .8, 0);
+    snprintf(info_text, sizeof(info_text), "%d", seeds);
+    cairo_show_text(cr, info_text);
+
+    cairo_set_source_rgb(cr, 0, 0, 0);
+    snprintf(info_text, sizeof(info_text), "; peers: ");
+    cairo_show_text(cr, info_text);
+
+    cairo_set_source_rgb(cr, .8, 0, 0);
+    snprintf(info_text, sizeof(info_text), "%d", peers);
+    cairo_show_text(cr, info_text);
+
+    cairo_set_source_rgb(cr, 0, 0, 0);
     cairo_move_to(cr, 5, 47);
     char tracker_text[256];
     snprintf(tracker_text, sizeof(tracker_text), "info from %d trackers - time: %d", tracker_count, time);
