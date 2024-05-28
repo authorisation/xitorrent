@@ -1,14 +1,22 @@
-#ifndef TORRENT_PARSER_H
-#define TORRENT_PARSER_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define INFOHASH_LENGTH 40
 
-void decode(char** data);
-void decode_dict(char** data, int calculate_info_hash, const char** info_start, long* info_length);
-void decode_list(char** data);
-void decode_int(char** data);
-void decode_string(char** data);
-void get_info_hash(char** data, const char** info_start, long* info_length);
-char* read_file(const char* filename, long* length);
+typedef struct {
+    char name[256];
+    char info_hash[INFOHASH_LENGTH + 1];
+    char total_size[32];
+    int file_count;
+    int num_seeds;
+    int num_peers;
+    int num_trackers;
+} TorrentInfo;
 
+void parseTorrent(const char* filename, TorrentInfo* torrent_info);
+char* readFile(const char* filename, long* length);
+
+#ifdef __cplusplus
+}
 #endif

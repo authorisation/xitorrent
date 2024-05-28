@@ -1,5 +1,6 @@
 #include <cairo/cairo.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 cairo_surface_t* init_image(int width, int height) {
     cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
@@ -33,7 +34,6 @@ cairo_surface_t* init_image(int width, int height) {
     return surface;
 }
 
-
 void draw_title(const char *filename, const char *text, const char *info, cairo_surface_t *surface) {
     cairo_t *cr = cairo_create(surface);
     cairo_set_source_rgb(cr, 0, 0, 0);
@@ -48,7 +48,7 @@ void draw_title(const char *filename, const char *text, const char *info, cairo_
     cairo_destroy(cr);
 }
 
-void draw_body(const char *filename, int seeds, int peers, int completed, int file_count, double file_size, int tracker_count, int time, cairo_surface_t *surface) {
+void draw_body(const char *filename, int seeds, int peers, int completed, int file_count, const char *file_size, int tracker_count, int time, cairo_surface_t *surface) {
     cairo_t *cr = cairo_create(surface);
 
     // Text options
@@ -57,10 +57,14 @@ void draw_body(const char *filename, int seeds, int peers, int completed, int fi
     cairo_set_font_size(cr, 14);
 
     cairo_move_to(cr, 5, 32);
-    //Placeholder text
-    cairo_show_text(cr, "files : %s (%s); seeds: %s; peers: %s; completed %s");
+    char info_text[256];
+    snprintf(info_text, sizeof(info_text), "files: %d (%s); seeds: %d; peers: %d", file_count, file_size, seeds, peers);
+    cairo_show_text(cr, info_text);
+
     cairo_move_to(cr, 5, 47);
-    cairo_show_text(cr, "info from %s trackers - %s (%s)");
+    char tracker_text[256];
+    snprintf(tracker_text, sizeof(tracker_text), "info from %d trackers - time: %d", tracker_count, time);
+    cairo_show_text(cr, tracker_text);
 
     cairo_surface_write_to_png(surface, filename);
 
