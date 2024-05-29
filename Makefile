@@ -7,7 +7,7 @@ CXXFLAGS = -Wall -g -std=c++17
 LIBS = -lcairo -ltorrent-rasterbar -lboost_system
 TARGET = xitorrent
 
-SRCS = main.c draw.c
+SRCS = main.c draw.c utils/op.c
 CXX_SRCS = utils/torrent_parser.cpp
 
 OBJS = $(SRCS:.c=.o)
@@ -31,4 +31,8 @@ clean:
 install:
 	cp $(TARGET) /usr/local/bin
 
+appversion:
+	./$(TARGET) -v > version.txt
+	sed -i 's/version //g' version.txt
+	
 .PHONY: all clean

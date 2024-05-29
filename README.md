@@ -28,10 +28,8 @@ Optionally if you want to install it system-wide run:
 3. `$ sudo make install`<br>
 If you use doas run it with doas, you should know this.
 
-If it cries to you because of some missing library makes sure that these are installed (subject to change):
-- cairo
-- bendecode
-- openssl
-
 ## Side notes
+> [!WARNING]  
+> Using this might reveal your IP address to peers.
+
 Thanks to every library for allowing pseudo-programmers like me to use them.

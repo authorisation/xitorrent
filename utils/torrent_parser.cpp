@@ -6,7 +6,9 @@
 #include <libtorrent/alert_types.hpp>
 #include <libtorrent/magnet_uri.hpp>
 #include <libtorrent/torrent_status.hpp>
+
 #include "torrent_parser.h"
+#include "op.h"
 
 std::string formatSize(int64_t size) {
     const char* units[] = {"B", "KB", "MB", "GB"};
@@ -56,37 +58,44 @@ void parseTorrent(const char* filename, TorrentInfo* torrentInfo) {
     if (ec) {
         return;
     }
+    verbose_log("Torrent file loaded successfully\n");
 
     libtorrent::settings_pack settings;
     settings.set_bool(libtorrent::settings_pack::enable_dht, false);
     settings.set_bool(libtorrent::settings_pack::enable_lsd, false);
     settings.set_bool(libtorrent::settings_pack::enable_upnp, false);
     libtorrent::session ses(settings);
+    verbose_log("Session created\n");
 
     libtorrent::add_torrent_params atp;
     atp.ti = std::make_shared<libtorrent::torrent_info>(ti);
     atp.save_path = ".";
     atp.flags |= libtorrent::torrent_flags::seed_mode;
     libtorrent::torrent_handle th = ses.add_torrent(atp, ec);
-
-    if (ec) {
-        return;
-    }
+    if (ec) return;
+    verbose_log("Torrent added to session successfully\n");
 
     libtorrent::torrent_status status;
     do {
         status = th.status();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     } while (!status.has_metadata);
+    verbose_log("Metadata acquired\n");
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 3; ++i) {
         status = th.status();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        verbose_log("Status update: seeds=%d, peers=%d, download_rate=%.2f kB/s\n",
+            status.num_seeds, status.num_peers, status.download_rate / 1000.0);
     }
 
     std::string name = status.name;
     std::string infoHash = toHex(status.info_hashes.v1);
     std::string totalSize = formatSize(th.torrent_file()->total_size());
+
+    verbose_log("Torrent name: %s\n", name.c_str());
+    verbose_log("Info hash: %s\n", infoHash.c_str());
+    verbose_log("Total size: %s\n", totalSize.c_str());
 
     strncpy(torrentInfo->name, name.c_str(), sizeof(torrentInfo->name));
     strncpy(torrentInfo->info_hash, infoHash.c_str(), sizeof(torrentInfo->info_hash));
@@ -95,4 +104,7 @@ void parseTorrent(const char* filename, TorrentInfo* torrentInfo) {
     torrentInfo->num_seeds = status.num_complete;
     torrentInfo->num_peers = status.num_incomplete;
     torrentInfo->num_trackers = th.torrent_file()->trackers().size();
+
+    verbose_log("Torrent info parsed: file_count=%d, num_seeds=%d, num_peers=%d, num_trackers=%d\n",
+            torrentInfo->file_count, torrentInfo->num_seeds, torrentInfo->num_peers, torrentInfo->num_trackers);
 }
