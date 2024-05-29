@@ -66,7 +66,7 @@ void draw_body(const char *filename, int seeds, int peers, int completed, int fi
     cairo_show_text(cr, info_text);
 
     cairo_set_source_rgb(cr, 0, 0, 0);
-    snprintf(info_text, sizeof(info_text), "; peers: ");
+    snprintf(info_text, sizeof(info_text), "; leeches: ");
     cairo_show_text(cr, info_text);
 
     cairo_set_source_rgb(cr, .8, 0, 0);

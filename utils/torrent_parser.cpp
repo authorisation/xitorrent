@@ -61,32 +61,48 @@ void parseTorrent(const char* filename, TorrentInfo* torrentInfo) {
     verbose_log("Torrent file loaded successfully\n");
 
     libtorrent::settings_pack settings;
-    settings.set_bool(libtorrent::settings_pack::enable_dht, false);
-    settings.set_bool(libtorrent::settings_pack::enable_lsd, false);
-    settings.set_bool(libtorrent::settings_pack::enable_upnp, false);
+    settings.set_bool(libtorrent::settings_pack::enable_dht, true);
+    settings.set_bool(libtorrent::settings_pack::enable_lsd, true);
+    settings.set_bool(libtorrent::settings_pack::enable_upnp, true);
     libtorrent::session ses(settings);
     verbose_log("Session created\n");
 
     libtorrent::add_torrent_params atp;
     atp.ti = std::make_shared<libtorrent::torrent_info>(ti);
     atp.save_path = ".";
-    atp.flags |= libtorrent::torrent_flags::seed_mode;
+    atp.flags |= libtorrent::torrent_flags::upload_mode;
     libtorrent::torrent_handle th = ses.add_torrent(atp, ec);
-    if (ec) return;
+    if (ec) {
+        return;
+    }
     verbose_log("Torrent added to session successfully\n");
 
+    auto trackers = th.torrent_file()->trackers();
+    for (auto& tracker : trackers) {
+        th.add_tracker(libtorrent::announce_entry(tracker.url));
+    }
+    verbose_log("Trackers added\n");
+
     libtorrent::torrent_status status;
-    do {
-        status = th.status();
+    while (!status.has_metadata) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    } while (!status.has_metadata);
+        status = th.status();
+    }
     verbose_log("Metadata acquired\n");
 
-    for (int i = 0; i < 3; ++i) {
-        status = th.status();
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        verbose_log("Status update: seeds=%d, peers=%d, download_rate=%.2f kB/s\n",
-            status.num_seeds, status.num_peers, status.download_rate / 1000.0);
+    std::atomic<bool> done(false);
+    std::thread([&]() {
+        for (int i = 0; i < 10 && !done; ++i) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            status = th.status();
+            verbose_log("Status update %d: seeds=%d, peers=%d, download_rate=%.2f kB/s\n",
+                i, status.num_seeds, status.num_peers, status.download_rate / 1000.0);
+        }
+        done = true;
+    }).detach();
+
+    while (!done) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     std::string name = status.name;
