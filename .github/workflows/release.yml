@@ -1,0 +1,53 @@
+name: release CI
+on:
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: 'Mark as Pre-release'
+        required: false
+        type: boolean
+      publish:
+        description: 'Publish release'
+        required: false
+        type: boolean
+        default: true
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Set up dependencies
+        with:
+          run: |
+            sudo apt-get install -y make gcc g++ libboost-all-dev libtorrent-rasterbar-dev libcairo2-dev
+          
+      - name: Build
+        run: |
+          make -j$(nproc)
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: xitorrent
+          path: xitorrent
+
+      - name: Set version
+        run: |
+          make appversion
+          echo "version=$(cat version.txt)" >> $GITHUB_ENV
+
+      - name: Create release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: ./xitorrent
+          tag_name: v${{ env.version }}
+          release_name: Release ${{ env.version }}
+          prerelease: ${{ inputs.prerelease }}
+          draft: false
