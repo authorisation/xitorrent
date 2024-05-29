@@ -52,7 +52,43 @@ char* readFile(const char* filename, long* length) {
     return buffer;
 }
 
+bool torrent_health_check(const char* filename) {
+    struct stat statbuf;
+    if (stat(filename, &statbuf) != 0) {
+        printf("Failed to stat file: %s\n", filename);
+        return false;
+    }
+    if (S_ISDIR(statbuf.st_mode)) {
+        printf("Error: %s is a directory\n", filename);
+        return false;
+    }
+
+    std::ifstream ifs(filename, std::ios::binary);
+    if (!ifs) {
+        printf("Failed to open file: %s\n", filename);
+        return false;
+    }
+
+    std::vector<char> buffer((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+    ifs.close();
+
+    libtorrent::error_code ec;
+    libtorrent::bdecode_node node;
+    libtorrent::bdecode(buffer.data(), buffer.data() + buffer.size(), node, ec);
+    if (ec) {
+        printf("Failed bdecode: %s\n", filename);
+        return false;
+    }
+
+    return true;
+}
+
 void parseTorrent(const char* filename, TorrentInfo* torrentInfo) {
+    if (!torrent_health_check(filename)) {
+        printf("Error: invalid torrent file\n");
+        exit(EXIT_FAILURE);
+    }
+
     libtorrent::error_code ec;
     libtorrent::torrent_info ti(filename, ec);
     if (ec) {
