@@ -4,7 +4,7 @@ CXX = g++
 CFLAGS = -Wall -g
 CXXFLAGS = -Wall -g -std=c++17
 
-LIBS = -lcairo -lcrypto -lssl -ltorrent-rasterbar -lboost_system
+LIBS = -lcairo -ltorrent-rasterbar -lboost_system
 TARGET = xitorrent
 
 SRCS = main.c draw.c
@@ -17,6 +17,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS) $(CXX_OBJS)
 	$(CXX) $(CFLAGS) $(CXXFLAGS) -o $(TARGET) $(OBJS) $(CXX_OBJS) $(LIBS)
+	strip -s $(TARGET)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
