@@ -27,7 +27,6 @@ void print_help(const char *progname) {
 
 int main(int argc, char *argv[]) {
     const char *title = NULL;
-    const char *info = NULL;
     const char *input_filename = NULL;
     const char *output_filename = NULL;
 
@@ -75,7 +74,7 @@ int main(int argc, char *argv[]) {
     cairo_surface_t *surface = init_image(494, 55);
     title = title ? title : torrent_info.name;
     int unix_time = (int)time(NULL);
-    draw_title(output_filename, title, info, surface);
+    draw_title(output_filename, title, surface);
     draw_body(output_filename, torrent_info.num_seeds, torrent_info.num_peers, 0, torrent_info.file_count, torrent_info.total_size, torrent_info.num_trackers, unix_time, surface);
 
     verbose_log("Title: %s\n", title);

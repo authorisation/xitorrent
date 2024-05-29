@@ -34,7 +34,7 @@ cairo_surface_t* init_image(int width, int height) {
     return surface;
 }
 
-void draw_title(const char *filename, const char *text, const char *info, cairo_surface_t *surface) {
+void draw_title(const char *filename, const char *text, cairo_surface_t *surface) {
     cairo_t *cr = cairo_create(surface);
     cairo_set_source_rgb(cr, 0, 0, 0);
     cairo_select_font_face(cr, "Tahoma", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
