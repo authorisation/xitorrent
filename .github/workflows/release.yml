@@ -31,7 +31,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: xitorrent
+          name: xitorrent-x86_64
           path: xitorrent
 
       - name: Set version
@@ -40,13 +40,9 @@ jobs:
           echo "version=$(cat version.txt)" >> $GITHUB_ENV
 
       - name: Create release
-        id: create_release
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: marvinpinto/action-automatic-releases@latest
         with:
-          files: ./xitorrent
-          tag_name: v${{ env.version }}
-          release_name: Release ${{ env.version }}
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: ${{ inputs.prerelease }}
-          draft: false
+          files: ./xitorrent
+          automatic_release_tag: v${{ env.version }}
