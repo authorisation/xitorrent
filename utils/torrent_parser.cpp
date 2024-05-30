@@ -100,6 +100,7 @@ void parseTorrent(const char* filename, TorrentInfo* torrentInfo) {
     settings.set_bool(libtorrent::settings_pack::enable_dht, true);
     settings.set_bool(libtorrent::settings_pack::enable_lsd, true);
     settings.set_bool(libtorrent::settings_pack::enable_upnp, true);
+    settings.set_bool(libtorrent::settings_pack::enable_natpmp, true);
     libtorrent::session ses(settings);
     verbose_log("Session created\n");
 
@@ -132,7 +133,7 @@ void parseTorrent(const char* filename, TorrentInfo* torrentInfo) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
             status = th.status();
             verbose_log("Status update %d: seeds=%d, peers=%d, download_rate=%.2f kB/s\n",
-                i, status.num_seeds, status.num_peers, status.download_rate / 1000.0);
+                i, status.num_complete, status.num_incomplete, status.download_rate / 1000.0);
         }
         done = true;
     }).detach();
