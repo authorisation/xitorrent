@@ -129,7 +129,7 @@ void parseTorrent(const char* filename, TorrentInfo* torrentInfo) {
 
     std::atomic<bool> done(false);
     std::thread([&]() {
-        for (int i = 0; i < 10 && !done; ++i) {
+        for (int i = 0; i < 6 && !done; ++i) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
             status = th.status();
             verbose_log("Status update %d: seeds=%d, peers=%d, download_rate=%.2f kB/s\n",
