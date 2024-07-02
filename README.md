@@ -11,6 +11,10 @@ BECAUSE IT'S COOL
 ### Okay, but why is there yumeko?
 BEcause she is literally the coolest ever.
 
+### What about Ai???!?!
+OMG! I cannot even express how awesome she is! I wish to be an idol one day. <3
+###### No, not Artifical Intelligence, suckless you sucker.
+
 ### Why is it called [X info torrent]
 I don't know, sounded cool to me, I guess?
 
@@ -32,4 +36,5 @@ If you use doas run it with doas, you should know this.
 > [!WARNING]  
 > Using this might reveal your IP address to peers.
 
-Thanks to every library for allowing pseudo-programmers like me to use them.
+Thanks to every library for allowing pseudo-programmers like me to use them.<br>
+I, shutdown.
