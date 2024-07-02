@@ -1,16 +1,49 @@
 #include <cairo/cairo.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-cairo_surface_t* init_image(int width, int height) {
+#include "utils/op.h"
+#include "draw.h"
+
+const AssetMapping asset_mappings[] = {
+    {"ai1", "ai_asset_1.png", 0.01425},
+    {"ai2", "ai_asset_2.png", 0.08},
+    {"ai3", "ai_asset_3.png", 0.1035},
+    {"yumeko", "yumeko_asset.png", 0.155555}
+};
+
+const int num_assets = sizeof(asset_mappings) / sizeof(asset_mappings[0]);
+
+const char* get_asset_filename(const char *option) {
+    for (int i = 0; i < num_assets; i++) {
+        if (strcmp(asset_mappings[i].option, option) == 0) {
+            verbose_log("Got asset filename: %s\n", asset_mappings[i].filename);
+            return asset_mappings[i].filename;
+        }
+    }
+    return "yumeko_asset.png";
+}
+
+double get_scale_factor(const char *option) {
+    for (int i = 0; i < num_assets; i++) {
+        if (strcmp(asset_mappings[i].option, option) == 0) {
+            return asset_mappings[i].scale_factor;
+        }
+    }
+    return 0.155555;
+}
+
+cairo_surface_t* init_image(int width, int height, const char *asset) {
     cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     cairo_t *cr = cairo_create(surface);
 
     cairo_set_source_rgb(cr, 1, 1, 1);
     cairo_paint(cr);
 
-    // Yumeko!
-    const char *goddess = "yumeko_asset.png";
+    const char* final_asset = get_asset_filename(asset);
+    const char *goddess = final_asset;
+
     cairo_surface_t *image = cairo_image_surface_create_from_png(goddess);
     if (cairo_surface_status(image) != CAIRO_STATUS_SUCCESS) {
         fprintf(stderr, "Error: Could not load image %s\n", goddess);
@@ -18,11 +51,13 @@ cairo_surface_t* init_image(int width, int height) {
         cairo_surface_destroy(surface);
         return NULL;
     }
+
     int image_width = cairo_image_surface_get_width(image);
     int image_height = cairo_image_surface_get_height(image);
-    double scale_factor = 0.155555;
+    double scale_factor = get_scale_factor(asset);
     double scaled_width = image_width * scale_factor;
     double scaled_height = image_height * scale_factor;
+
     cairo_save(cr);
     cairo_translate(cr, width - scaled_width - 10, height - scaled_height);
     cairo_scale(cr, scale_factor, scale_factor);
@@ -30,6 +65,7 @@ cairo_surface_t* init_image(int width, int height) {
     cairo_paint(cr);
     cairo_restore(cr);
 
+    cairo_surface_destroy(image);
     cairo_destroy(cr);
     return surface;
 }

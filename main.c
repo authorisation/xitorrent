@@ -11,33 +11,42 @@
 #include "utils/torrent_parser.h"
 #include "utils/op.h"
 
-#define VERSION "1.0.0"
+#define VERSION "1.1.0"
 
 int verbose = 0;
 
 void print_help(const char *progname) {
-    printf("Usage: %s [-h] [-b] [-t title] -i file.torrent -o output.png\n", progname);
+    printf("Usage: %s [-h] [-b] [-t title] [-f ai1] -i file.torrent -o output.png\n", progname);
     printf("  -h                            Display this help message\n");
     printf("  -t <text>                     Torrent title\n");
     printf("  -i <input.torrent>            Input torrent file\n");
     printf("  -o <output.png>               Output image file\n");
+    printf("  -f <asset>                    Force image (ai1, ai2, ai3, yumeko)\n");
     printf("  -b                            Verbose output\n");
     printf("  -v                            Display Version\n");
 }
 
 int main(int argc, char *argv[]) {
+    const char *asset = NULL;
     const char *title = NULL;
     const char *input_filename = NULL;
     const char *output_filename = NULL;
 
     int opt;
-    while ((opt = getopt(argc, argv, "ht:i:o:bv")) != -1) {
+    while ((opt = getopt(argc, argv, "ht:f:i:o:bv")) != -1) {
         switch (opt) {
             case 'h':
                 print_help(argv[0]);
                 exit(EXIT_SUCCESS);
             case 't':
                 title = optarg;
+                break;
+            case 'f':
+                if(strchr(optarg, '-') != NULL) {
+                    printf("Error: Invalid argument supplied for -f\n");
+                    exit(EXIT_FAILURE);
+                }
+                asset = optarg;
                 break;
             case 'i':
                 input_filename = optarg;
@@ -63,15 +72,24 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    if(asset == NULL) {
+        //Grab random asset
+        srand(time(NULL));
+        int random_index = rand() % num_assets;
+
+        verbose_log("Randomly selected asset: %s\n", asset_mappings[random_index].option);
+        asset = asset_mappings[rand() % num_assets].option;
+    }
     //Torrent parser
     TorrentInfo torrent_info;
     parseTorrent(input_filename, &torrent_info);
 
     verbose_log("Input file: %s\n", input_filename);
     verbose_log("Output file: %s\n", output_filename);
+    verbose_log("Asset: %s\n", asset);
 
     //Image drawing
-    cairo_surface_t *surface = init_image(494, 55);
+    cairo_surface_t *surface = init_image(495, 55, asset);
     title = title ? title : torrent_info.name;
     int unix_time = (int)time(NULL);
     draw_title(output_filename, title, surface);
